@@ -1,26 +1,29 @@
-name: Deploy to EC2
+name: Deploy to Server
 
 on:
   push:
     branches:
-      - main   # deploy only when pushing to main branch
+      - main   # Run this workflow only when pushing to main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # Step 1: Checkout the latest code
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Deploy via SSH
+      # Step 2: Run deployment via SSH
+      - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.1.0
         with:
-          host: 3.17.31.222
-          username: test_1
-          key: ${{ secrets.DEPLOY_KEY }}   # private key you stored in GitHub
+          host: 3.17.31.222           # <-- Replace with your server IP
+          username: test_1            # <-- Your server username
+          key: ${{ secrets.SSH_PRIVATE_KEY }}  # <-- Private key stored in GitHub Secrets
+          port: 22
           script: |
-            cd /home/test_1/app || exit 1
+            echo "✅ Connected to server"
+            cd /home/test_1/app       # <-- Change to your app folder
             git pull origin main
-            # restart your service if needed
-            # e.g.: systemctl restart myapp
+            ./deploy.sh               # <-- Run your deploy script
